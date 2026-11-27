@@ -1,0 +1,35 @@
+# Local services for USIMS development. The API and SPA run on the host:
+#   backend:  php artisan serve        (http://localhost:8000)
+#   frontend: npm run dev              (http://localhost:5173)
+# Keycloak and Moodle are used from milestone M5 (single sign-on and LMS sync).
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: usims
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: usims
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports: ["8025:8025", "1025:1025"]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    profiles: ["sso"]
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports: ["8080:8080"]
+
+volumes:
+  pgdata:

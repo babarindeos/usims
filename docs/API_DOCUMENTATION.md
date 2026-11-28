@@ -69,3 +69,42 @@ Lists are paginated (`?page=`, `?per_page=` up to 100) except where noted.
 | POST | /workflows/{uuid}/actions | `{action: approve/reject/return/resubmit/cancel, remarks}` |
 | GET | /notifications?unread=1 | own only |
 | POST | /notifications/{uuid}/read, /notifications/read-all | own only |
+
+## Academic setup (M2)
+
+Catalogue reads (programmes, courses, published curricula, published offerings) are open to every
+signed-in user. Writes check the permission against the record's department.
+
+| Method | Path | Permission |
+| --- | --- | --- |
+| GET | /academic-config/{award-types\|study-modes\|programme-categories}?include_inactive=1 | signed in |
+| POST | /academic-config/{kind} | academic_config.manage; `{code, name, level?}` |
+| PATCH | /academic-config/{kind}/{code} | academic_config.manage; `{name?, active?}` |
+| GET | /programmes?q=&department=&status= | signed in (not paginated) |
+| POST / PATCH | /programmes[/{uuid}] | programmes.manage over the department; `study_modes: [{code, duration_years?}]`, `entry_levels: [100, 200]` |
+| GET | /courses?q=&department=&level=&status=active\|retired\|all | signed in (paginated, up to 200) |
+| POST / PATCH | /courses[/{uuid}] | courses.manage over the department |
+| POST | /courses/{uuid}/requisites | courses.manage; `{course_id, type: prerequisite\|corequisite, requirement: pass\|registered}` |
+| DELETE | /courses/{uuid}/requisites/{id} | courses.manage |
+| GET | /curricula?programme=&status= | published and retired for all; others need curricula.view in scope |
+| GET | /curricula/{uuid} | as above; includes courses, groups and approval workflow |
+| POST | /curricula | curricula.manage; `{programme_id, effective_session_id, required_credit_units, based_on_id?}` |
+| PATCH | /curricula/{uuid} | curricula.manage; draft or returned only |
+| POST / PATCH / DELETE | /curricula/{uuid}/courses[/{id}] | curricula.manage; draft or returned only |
+| POST / DELETE | /curricula/{uuid}/elective-groups[/{id}] | curricula.manage; draft or returned only |
+| POST | /curricula/{uuid}/submit | curricula.manage; starts or resubmits the `curriculum_approval` workflow |
+| POST | /curricula/{uuid}/publish | curricula.publish; approved only |
+| POST | /curricula/{uuid}/retire | curricula.publish; `{reason}` |
+| GET | /staff?q=&department=&status=&category= | staff.view, filtered to scope |
+| GET | /staff/{uuid} | staff.view over the unit |
+| POST | /staff | staff.manage over the unit; `person_id` or `person{…}` (409 with `matches` on possible duplicates) |
+| PATCH | /staff/{uuid} | staff.manage; `employment_status` needs `reason` |
+| GET | /offerings?semester=&department=&status=&q=&flagged=1 | published for all; drafts need offerings.view in scope |
+| POST | /offerings | offerings.manage over the delivering unit; `{course_id, semester_id, group_code?, capacity?, delivery_mode?}` |
+| POST | /semesters/{id}/offerings/generate | offerings.manage; returns `{created, linked, skipped_out_of_scope}` |
+| GET / PATCH | /offerings/{uuid} | view as above; PATCH offerings.manage |
+| POST | /offerings/{uuid}/publish | offerings.manage; sets `lms_shortname` |
+| POST | /offerings/{uuid}/cancel | offerings.manage; `{reason}`; ends active staff assignments |
+| POST / DELETE | /offerings/{uuid}/programmes[/{id}] | offerings.manage; `{programme_id, level}` |
+| POST | /offerings/{uuid}/staff | offerings.allocate; `{staff_id, role, reason?}` |
+| POST | /offerings/{uuid}/staff/{id}/end | offerings.allocate; `{reason}` |

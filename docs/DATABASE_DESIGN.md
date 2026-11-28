@@ -55,8 +55,46 @@ snapshots.
 | notification_deliveries | mail and SMS delivery log with attempts and errors |
 | notification_preferences | opt-outs for non-mandatory notifications |
 
+## Tables built in M2
+
+### Programmes
+| Table | Purpose |
+| --- | --- |
+| award_types, study_modes, programme_categories | institution-defined lists; `code` fixed, `active` flag |
+| programmes | code, name, owning org unit, award, category, normal/min/max duration (CHECK min ≤ normal ≤ max), capacity, accreditation, status |
+| programme_study_modes | modes a programme runs in, optional duration override |
+| programme_entry_levels | levels new students can enter at (100, 200 for direct entry, …) |
+
+### Staff
+| Table | Purpose |
+| --- | --- |
+| staff | one row per person employed: staff number, org unit, category, rank, employment status, source (`manual`, `demo`, later `hr`) |
+
+### Curriculum
+| Table | Purpose |
+| --- | --- |
+| courses | catalogue: code (`CSC 301`, unique), title, units, level, usual semester, owning department, type, practical hours, status |
+| course_requisites | prerequisite or co-requisite pairs; CHECK not self; loops refused in `CourseService` |
+| curriculum_versions | per programme, numbered; first entry session, rules, status (draft, in_review, returned, approved, published, retired, rejected), `based_on_id` |
+| elective_groups | named groups with minimum and maximum units per level and semester |
+| curriculum_courses | course placement in a version: level, semester, category, units copied at mapping time, optional elective group |
+
+Trigger `curriculum_locked_guard` rejects inserts, updates and deletes on `curriculum_courses` and
+`elective_groups` unless the parent version is `draft` or `returned`, so a submitted or published
+curriculum cannot change even outside the application.
+
+### Offerings
+| Table | Purpose |
+| --- | --- |
+| course_offerings | a course in a semester and group (unique together); delivering unit, capacity, registration window override, delivery mode, status, LMS short name (unique, set on publish) |
+| course_offering_programmes | programme cohorts (programme + level) taking the offering |
+| course_offering_staff | staff roles on an offering with effective dates; ended rows keep `end_reason` and `ended_by`; `flagged_at` marks assignments to reassign. Partial unique index on active (offering, staff, role) |
+
+Settings used: `teaching_eligible_categories` (default `["academic"]`), `lms_shortname_format`
+(default `{code}-{session}-{semester}{group}`).
+
 ## Planned (later milestones)
 
-The lifecycle spine (programmes, curriculum versions, course offerings, applications, students,
+The rest of the lifecycle spine (applications, students,
 invoices, payments, registrations, results, Moodle mappings, outbox) is specified in the
 architecture review and is added module by module, each with its migration and this file updated.

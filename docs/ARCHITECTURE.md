@@ -14,7 +14,11 @@ records what is built.
 | Audit | append-only audit log, access log, request audit context | M1 |
 | Workflow | definitions, stages, instances, actions; the approval engine | M1 |
 | Notifications | templates, in-app notifications, mail deliveries, preferences | M1 |
-| Programmes, Curriculum, Offerings, Admissions, Registry, Finance, Registration, Results, Staff, Graduation, Integrations, Reporting | later milestones | planned |
+| Programmes | award types, study modes, programme categories, programmes | M2 |
+| Curriculum | courses, requisites, curriculum versions, elective groups; curriculum approval | M2 |
+| Offerings | course offerings, cohort links, staff assignments | M2 |
+| Staff | minimal staff record linked to the person master (HR extends it in M6) | M2 |
+| Admissions, Registry, Finance, Registration, Results, Graduation, Integrations, Reporting | later milestones | planned |
 
 Each module holds `Models`, `Services`, `Http/{Controllers,Requests,Resources}`, `Events`,
 `Database/Migrations` and a `routes.php` mounted under `/api/v1` by
@@ -55,6 +59,22 @@ System Administrator role carries no academic or financial approval permissions 
 - Maker-checker: the initiator cannot approve their own submission unless the definition allows it.
 - One open instance per record. Every action is stored with user, role, remarks and a reference.
 - `WorkflowCompleted` is dispatched on approval or rejection; modules listen for their process.
+
+## Academic setup (M2)
+
+- Curriculum versions move draft → in_review → approved → published → retired (or returned,
+  rejected). `CurriculumService::submit` starts the `curriculum_approval` workflow; the
+  `SyncCurriculumWithWorkflow` listener maps every `WorkflowStageChanged` back onto the version.
+  Stages and approvers are data in `workflow_definitions`, seeded with HOD then Academic Planning.
+- Edit rules are enforced twice: the service refuses changes outside draft/returned, and a database
+  trigger refuses them at the table level.
+- Offerings are generated from published curricula for the semester's sequence. Generation is
+  scoped per course: a user only creates offerings for departments they manage, and the result
+  says how many were left for others.
+- Staff eligibility and LMS short names come from settings, not code. Staff status changes raise
+  `StaffStatusChanged`; `FlagAssignmentsOnStaffChange` (Offerings) flags live assignments rather than
+  ending them, so a person decides who takes over. `OfferingPublished`, `StaffAssigned` and
+  `StaffAssignmentEnded` are the hooks the Moodle integration will use in M5.
 
 ## Audit
 

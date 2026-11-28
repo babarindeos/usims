@@ -87,7 +87,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
         <h1 className="text-xl font-semibold">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       </div>
-      {actions && <div className="flex gap-2">{actions}</div>}
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   )
 }
@@ -97,6 +97,8 @@ const tones: Record<string, string> = {
   suspended: 'bg-warn/10 text-warn', returned: 'bg-warn/10 text-warn', in_progress: 'bg-brand/10 text-brand',
   closed: 'bg-canvas text-muted', disabled: 'bg-canvas text-muted', inactive: 'bg-canvas text-muted', planned: 'bg-canvas text-muted',
   rejected: 'bg-bad/10 text-bad', cancelled: 'bg-canvas text-muted',
+  draft: 'bg-canvas text-muted', in_review: 'bg-brand/10 text-brand', published: 'bg-ok/10 text-ok', retired: 'bg-canvas text-muted',
+  on_leave: 'bg-warn/10 text-warn', exited: 'bg-bad/10 text-bad', ended: 'bg-canvas text-muted', phased_out: 'bg-canvas text-muted',
 }
 
 export function StatusBadge({ status }: { status: string }) {

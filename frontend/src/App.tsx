@@ -2,6 +2,14 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './app/auth'
 import { Spinner } from './design-system'
 import { AppShell } from './layout/AppShell'
+import { AcademicConfigPage } from './modules/academic/AcademicConfigPage'
+import { CourseDetailPage } from './modules/academic/CourseDetailPage'
+import { CoursesPage } from './modules/academic/CoursesPage'
+import { CurriculumPage } from './modules/academic/CurriculumPage'
+import { OfferingDetailPage } from './modules/academic/OfferingDetailPage'
+import { OfferingsPage } from './modules/academic/OfferingsPage'
+import { ProgrammeDetailPage } from './modules/academic/ProgrammeDetailPage'
+import { ProgrammesPage } from './modules/academic/ProgrammesPage'
 import { AuditLogPage } from './modules/audit/AuditLogPage'
 import { LoginPage } from './modules/auth/LoginPage'
 import { DashboardPage } from './modules/dashboard/DashboardPage'
@@ -14,6 +22,7 @@ import { CalendarPage } from './modules/institution/CalendarPage'
 import { SessionsPage } from './modules/institution/SessionsPage'
 import { StructurePage } from './modules/institution/StructurePage'
 import { BrandingPage } from './modules/settings/BrandingPage'
+import { StaffPage } from './modules/staff/StaffPage'
 import { ApprovalDetailPage } from './modules/workflow/ApprovalDetailPage'
 import { ApprovalsPage } from './modules/workflow/ApprovalsPage'
 
@@ -34,7 +43,16 @@ export default function App() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="structure" element={<StructurePage />} />
         <Route path="sessions" element={<SessionsPage />} />
+        <Route path="academic/programmes" element={<ProgrammesPage />} />
+        <Route path="academic/programmes/:id" element={<ProgrammeDetailPage />} />
+        <Route path="academic/courses" element={<CoursesPage />} />
+        <Route path="academic/courses/:id" element={<CourseDetailPage />} />
+        <Route path="academic/curricula/:id" element={<CurriculumPage />} />
+        <Route path="academic/offerings" element={<OfferingsPage />} />
+        <Route path="academic/offerings/:id" element={<OfferingDetailPage />} />
+        <Route path="academic/config" element={<AcademicConfigPage />} />
         <Route path="persons" element={<PersonsPage />} />
+        <Route path="staff" element={<StaffPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />
         <Route path="roles" element={<RolesPage />} />

@@ -9,7 +9,13 @@ export const NAV: NavItem[] = [
   { to: '/structure', label: 'Organisation structure', section: 'Institution' },
   { to: '/sessions', label: 'Sessions and semesters', section: 'Institution' },
 
+  { to: '/academic/programmes', label: 'Programmes', section: 'Academics' },
+  { to: '/academic/courses', label: 'Course catalogue', section: 'Academics' },
+  { to: '/academic/offerings', label: 'Course offerings', section: 'Academics' },
+  { to: '/academic/config', label: 'Academic configuration', permission: 'academic_config.manage', section: 'Academics' },
+
   { to: '/persons', label: 'Person records', permission: 'persons.view', section: 'Records' },
+  { to: '/staff', label: 'Staff records', permission: 'staff.view', section: 'Records' },
 
   { to: '/users', label: 'Users and access', permission: 'users.view', section: 'Administration' },
   { to: '/roles', label: 'Roles and permissions', permission: 'users.view', section: 'Administration' },

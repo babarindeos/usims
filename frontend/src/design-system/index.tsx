@@ -98,7 +98,12 @@ const tones: Record<string, string> = {
   closed: 'bg-canvas text-muted', disabled: 'bg-canvas text-muted', inactive: 'bg-canvas text-muted', planned: 'bg-canvas text-muted',
   rejected: 'bg-bad/10 text-bad', cancelled: 'bg-canvas text-muted',
   draft: 'bg-canvas text-muted', in_review: 'bg-brand/10 text-brand', published: 'bg-ok/10 text-ok', retired: 'bg-canvas text-muted',
-  on_leave: 'bg-warn/10 text-warn', exited: 'bg-bad/10 text-bad', ended: 'bg-canvas text-muted', phased_out: 'bg-canvas text-muted',
+  submitted: 'bg-brand/10 text-brand', under_review: 'bg-brand/10 text-brand', recommended: 'bg-ok/10 text-ok', on_hold: 'bg-warn/10 text-warn',
+  offered: 'bg-ok/10 text-ok', accepted: 'bg-ok/10 text-ok', declined: 'bg-canvas text-muted', expired: 'bg-canvas text-muted', withdrawn: 'bg-canvas text-muted',
+  verified: 'bg-ok/10 text-ok', pending: 'bg-warn/10 text-warn', awaiting_payment: 'bg-warn/10 text-warn', requires_correction: 'bg-warn/10 text-warn',
+  eligible: 'bg-ok/10 text-ok', ineligible: 'bg-bad/10 text-bad', manual_review: 'bg-warn/10 text-warn', pending_verification: 'bg-warn/10 text-warn',
+  scheduled: 'bg-brand/10 text-brand', matriculated: 'bg-ok/10 text-ok', deferred: 'bg-warn/10 text-warn', expelled: 'bg-bad/10 text-bad', graduated: 'bg-ok/10 text-ok',
+  ready: 'bg-ok/10 text-ok', on_leave: 'bg-warn/10 text-warn', exited: 'bg-bad/10 text-bad', ended: 'bg-canvas text-muted', phased_out: 'bg-canvas text-muted',
 }
 
 export function StatusBadge({ status }: { status: string }) {

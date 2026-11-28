@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../app/auth'
 import { useBranding } from '../../app/branding'
 import { Button, ErrorNotice, TextField } from '../../design-system'
@@ -9,6 +9,7 @@ export function LoginPage() {
   const { user, signIn } = useAuth()
   const branding = useBranding()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<unknown>(null)
@@ -39,11 +40,13 @@ export function LoginPage() {
           <p className="text-sm text-muted">{branding?.institution_name}</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-lg border border-line bg-surface p-6">
+          {params.get('verified') && <p role="status" className="rounded-md border border-ok/30 bg-ok/5 px-3 py-2 text-sm text-ok">Your email is verified. Sign in to continue your application.</p>}
           <ErrorNotice error={error} />
           <TextField label="Email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} />
           <TextField label="Password" type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
           <Button type="submit" busy={busy} className="w-full">Sign in</Button>
         </form>
+        <p className="mt-4 text-center text-sm text-muted">Applying for admission? <Link to="/register" className="font-medium text-brand">Create an applicant account</Link></p>
       </div>
     </div>
   )

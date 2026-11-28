@@ -60,3 +60,22 @@ export function qs(params: Record<string, string | number | boolean | undefined 
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
   return entries.length ? '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString() : ''
 }
+
+/** Multipart upload to the API (documents, evidence). */
+export async function upload<T = unknown>(path: string, form: FormData): Promise<T> {
+  await ensureCsrf()
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  const token = xsrfToken()
+  if (token) headers['X-XSRF-TOKEN'] = token
+  const res = await fetch(`/api/v1${path}`, { method: 'POST', credentials: 'include', headers, body: form })
+  const data = await res.json().catch(() => ({ title: res.statusText, status: res.status }))
+  if (!res.ok) throw new ApiError(data as Problem)
+  return data as T
+}
+
+/** All validation messages of an error, flattened, for forms that report several missing items at once. */
+export function errorList(error: unknown): string[] {
+  if (!(error instanceof ApiError)) return error instanceof Error ? [error.message] : []
+  const all = Object.values(error.problem.errors ?? {}).flat()
+  return all.length ? all : [error.message]
+}

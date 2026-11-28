@@ -18,7 +18,9 @@ records what is built.
 | Curriculum | courses, requisites, curriculum versions, elective groups; curriculum approval | M2 |
 | Offerings | course offerings, cohort links, staff assignments | M2 |
 | Staff | minimal staff record linked to the person master (HR extends it in M6) | M2 |
-| Admissions, Registry, Finance, Registration, Results, Graduation, Integrations, Reporting | later milestones | planned |
+| Admissions | admission configuration, exercises, applications, screening, payments recorded for verification, admission lists, offers, onboarding, clearance | M3 |
+| Registry | matric number formats, students, student status history; matriculation | M3 |
+| Finance, Registration, Results, Graduation, Integrations, Reporting | later milestones | planned |
 
 Each module holds `Models`, `Services`, `Http/{Controllers,Requests,Resources}`, `Events`,
 `Database/Migrations` and a `routes.php` mounted under `/api/v1` by
@@ -75,6 +77,37 @@ System Administrator role carries no academic or financial approval permissions 
   `StaffStatusChanged`; `FlagAssignmentsOnStaffChange` (Offerings) flags live assignments rather than
   ending them, so a person decides who takes over. `OfferingPublished`, `StaffAssigned` and
   `StaffAssignmentEnded` are the hooks the Moodle integration will use in M5.
+
+## Admissions to matriculation (M3)
+
+- Applicants register themselves (`/applicant/register`), verify their email through a signed link
+  (redirected to `FRONTEND_URL/login?verified=1`) and then hold only the `applicant` role. They reach
+  their own applications only; every other id returns 404. Applicant-only accounts get their own
+  navigation in the SPA.
+- An exercise fixes session, category, window, fees, acceptance days, programmes with capacities and
+  screening rules, and the documents required at application and at onboarding. Status: draft,
+  scheduled, open, suspended, closed; `effectiveStatus()` also honours the dates.
+- `ScreeningEngine` evaluates the rule keys stored per exercise programme (minimum UTME score,
+  required UTME subjects, O'Level credit subjects, credit count, sittings, verified documents, manual
+  review). Each check passes, fails, or is pending; the outcome is `eligible`, `ineligible`,
+  `pending_verification` or `manual_review`. Screening runs on submission (`ScreenOnSubmission`)
+  and on request, and every run is kept in `screening_results`.
+- Fees: no gateway is configured yet, so candidates record a bank payment with evidence and Bursary
+  verifies it. Nothing is simulated; M4 gateways will settle the same `admission_payments` rows.
+- Recommended applicants go on an admission list. `AdmissionListService::submit` checks capacity and
+  starts the `admission_approval` workflow (committee recommendation, then approval; editable as
+  data). `AdmissionWorkflowListener` syncs the list and, on approval, `OfferService` issues offers
+  with letters built from the `admission_letter_template` setting. Issued letters are stored and do
+  not change. Offers lapse after the acceptance window (`admissions:expire-offers`, daily).
+- After acceptance and onboarding, one clearance item is created per active clearance unit,
+  routed to a fixed office or to the candidate's department or faculty. When all are approved,
+  `ClearanceCompleted` fires; Registry matriculates in bulk, or automatically when the
+  `auto_matriculate` setting is true.
+- `MatriculationService` refuses offers with unmet conditions, creates the student, issues STU and
+  MATRIC identifiers, attaches the curriculum in force, and starts the append-only status history.
+  `MatricNumberService` builds numbers from the most specific active format; tokens are
+  `{YEAR} {YY} {DEPT} {FAC} {PROG} {CAT} {LEVEL} {SEQ:n}` and each prefix has its own row-locked
+  sequence.
 
 ## Audit
 

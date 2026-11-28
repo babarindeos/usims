@@ -108,3 +108,57 @@ signed-in user. Writes check the permission against the record's department.
 | POST / DELETE | /offerings/{uuid}/programmes[/{id}] | offerings.manage; `{programme_id, level}` |
 | POST | /offerings/{uuid}/staff | offerings.allocate; `{staff_id, role, reason?}` |
 | POST | /offerings/{uuid}/staff/{id}/end | offerings.allocate; `{reason}` |
+
+## Admissions and registry (M3)
+
+Public:
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | /applicant/register | `{surname, first_name, other_names?, email, phone, password, password_confirmation}`; sends a verification link |
+| GET | /applicant/verify/{user}/{hash} | signed link; redirects to the SPA sign-in |
+| GET | /admission-exercises/open | exercises taking applications now, with programmes and documents |
+
+Applicant (role `applicant`, permission applications.apply; own applications only):
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | /applicant/verification-notice | resend the link |
+| GET / POST | /applicant/applications | list; start `{exercise_id}` (email must be verified) |
+| GET | /applicant/applications/{uuid} | includes `missing` while editable, exercise programmes and documents, offer and clearance |
+| PUT | …/biodata, …/details, …/olevel, …/education | sections of the form; locked after submission unless corrections are open |
+| POST | …/documents | multipart `{document_type, file}` (PDF, JPG, PNG) |
+| POST | …/payments/{application_fee\|acceptance_fee} | `{reference, paid_on, evidence_document_id}` |
+| POST | …/submit | 422 lists what is missing |
+| POST | …/offer/accept, …/offer/decline | `{declaration: true}` / `{reason}` |
+| PUT | …/onboarding | sponsor, residence, emergency contact, medical, declaration; starts clearance |
+| POST | …/clearance/{item}/resubmit | `{remarks?}` after a correction request |
+
+Staff:
+
+| Method | Path | Permission |
+| --- | --- | --- |
+| GET / POST / PATCH | /admission-config/{categories\|exam-bodies\|subjects\|document-types\|clearance-units\|matric-formats}[/{id}] | read: signed in; write: admissions.configure |
+| GET / PUT | /admission-config/letter-template | admissions.configure |
+| GET / POST / PATCH | /admission-exercises[/{uuid}] | admissions.view / admissions.configure |
+| POST | /admission-exercises/{uuid}/status | admissions.configure; `{status, reason}` |
+| POST / PATCH / DELETE | /admission-exercises/{uuid}/programmes[/{id}] | admissions.configure; `{programme_id, entry_level, capacity?, rules?}` |
+| PUT | /admission-exercises/{uuid}/documents | admissions.configure; `{documents: [{code, stage, required}]}` |
+| GET | /admission-applications?exercise=&programme=&department=&status=&outcome=&min_score=&q= | admissions.view, filtered to scope (paginated) |
+| GET | /admission-applications/export | same filters, CSV |
+| GET | /admission-applications/{uuid} | admissions.view; written to the access log |
+| POST | /admission-applications/{uuid}/{screen\|recommend\|hold\|reject\|open-corrections\|close-corrections} | admissions.process; `{reason}` where required |
+| POST | /admission-applications/{uuid}/change-programme | admissions.change_programme; `{exercise_programme_id, reason}` |
+| GET / PATCH | /admission-documents/{uuid} | download (owner or staff in scope) / review `{status, remarks?}` |
+| GET | /admission-payments?status= | admission_payments.verify |
+| POST | /admission-payments/{uuid}/review | admission_payments.verify; `{approve, remarks?}` |
+| GET / POST | /admission-lists[/{uuid}] | admissions.view / admissions.lists |
+| POST / DELETE | /admission-lists/{uuid}/entries[/{application}] | admissions.lists; `{applications: [uuid]}` |
+| POST | /admission-lists/{uuid}/submit | admissions.lists; starts `admission_approval` |
+| GET | /admission-offers?exercise=&status= | admissions.view; includes clearance and unmet matriculation conditions |
+| GET | /clearance-items?status= | clearance.review, filtered to the officer's units |
+| POST | /clearance-items/{id}/review | clearance.review; `{status: under_review\|approved\|rejected\|requires_correction, remarks?}` |
+| POST | /matriculations | students.matriculate; `{offers: [uuid]}` returns matriculated and skipped with reasons |
+| GET | /students?q=&programme=&level=&status=&session= | students.view, filtered to scope |
+| GET | /students/{uuid} | students.view |
+| POST | /students/{uuid}/status | students.manage; `{status, reason, effective_on?}` |

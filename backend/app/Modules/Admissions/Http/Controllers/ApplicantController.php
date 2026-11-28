@@ -27,7 +27,7 @@ use Illuminate\Validation\ValidationException;
 class ApplicantController extends Controller
 {
     private const DETAIL = [
-        'person', 'exercise.category', 'exercise.session', 'choice.programme.orgUnit', 'secondChoice.programme.orgUnit',
+        'person', 'exercise.category', 'exercise.session', 'exercise.programmes.programme.orgUnit', 'exercise.documents.documentType', 'choice.programme.orgUnit', 'secondChoice.programme.orgUnit',
         'sittings.examBody', 'sittings.results.subject', 'sittings.results.grade', 'education', 'currentDocuments.documentType',
         'payments.evidence', 'history.user', 'offer.programme', 'offer.clearance.unit', 'offer.clearance.orgUnit', 'offer.clearance.actions.user',
     ];
@@ -38,9 +38,9 @@ class ApplicantController extends Controller
     {
         $data = $request->validate([
             'surname' => ['required', 'string', 'max:100'], 'first_name' => ['required', 'string', 'max:100'], 'other_names' => ['nullable', 'string', 'max:150'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'], 'phone' => ['required', 'string', 'max:30'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'], 'phone' => ['required', 'string', 'max:30', Rule::unique('persons', 'phone')->whereNull('merged_into_person_id')],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
-        ], ['email.unique' => 'An account already uses this email. Sign in, or reset your password.']);
+        ], ['email.unique' => 'An account already uses this email. Sign in, or reset your password.', 'phone.unique' => 'Another record already uses this phone number. Use your own number, or contact Registry.']);
         $accounts->register($data);
 
         return response()->json(['message' => 'Account created. Check your email for a link to verify your address, then sign in.'], 201);
@@ -51,7 +51,7 @@ class ApplicantController extends Controller
         abort_unless($request->hasValidSignature(), 403, 'This verification link has expired or is not valid.');
         $accounts->verify(User::where('uuid', $user)->firstOrFail(), $hash);
 
-        return redirect('/login?verified=1');
+        return redirect()->away(rtrim(config('app.frontend_url'), '/').'/login?verified=1');
     }
 
     public function resendVerification(Request $request, ApplicantAccountService $accounts): JsonResponse

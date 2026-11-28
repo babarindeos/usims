@@ -58,7 +58,7 @@ TXT;
         $template = Setting::where('key', 'admission_letter_template')->value('value') ?: self::DEFAULT_LETTER;
         $letter = NotificationTemplate::render($template, [
             'institution' => $branding['institution_name'] ?? 'University', 'date' => now()->format('j F Y'),
-            'admission_no' => $admissionNo, 'application_no' => $application->application_no, 'name' => $application->person->fullName(),
+            'admission_no' => $admissionNo, 'application_no' => $application->application_no, 'name' => trim("{$application->person->first_name} {$application->person->surname}"),
             'session' => $exercise->session->name, 'programme' => $programme->name, 'award' => $programme->awardType?->name,
             'department' => $programme->orgUnit?->name, 'category' => $exercise->category->name, 'level' => $application->choice->entry_level,
             'accept_by' => now()->addDays($exercise->acceptance_days)->format('j F Y'),

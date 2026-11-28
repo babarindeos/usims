@@ -29,7 +29,14 @@ class ApplicationResource extends JsonResource
             'id' => $this->uuid,
             'application_no' => $this->application_no,
             'status' => $this->status,
-            'exercise' => $this->exercise ? ['id' => $this->exercise->uuid, 'name' => $this->exercise->name, 'category' => $this->exercise->category?->only(['code', 'name', 'requires_jamb']), 'session' => $this->exercise->session?->name] : null,
+            'exercise' => $this->exercise ? [
+                'id' => $this->exercise->uuid, 'name' => $this->exercise->name, 'category' => $this->exercise->category?->only(['code', 'name', 'requires_jamb']),
+                'session' => $this->exercise->session?->name, 'closes_at' => $this->exercise->closes_at->toIso8601String(), 'instructions' => $this->exercise->instructions,
+                'programmes' => $this->when($this->exercise->relationLoaded('programmes'), fn () => $this->exercise->programmes->where('active', true)->values()->map(fn ($c) => $choice($c))),
+                'documents' => $this->when($this->exercise->relationLoaded('documents'), fn () => $this->exercise->documents->map(fn ($d) => [
+                    'code' => $d->documentType->code, 'name' => $d->documentType->name, 'stage' => $d->stage, 'required' => $d->required, 'max_kb' => $d->documentType->max_kb,
+                ])),
+            ] : null,
             'applicant' => $p ? [
                 'id' => $p->uuid, 'person_no' => $p->person_no, 'full_name' => $p->fullName(), 'title' => $p->title, 'surname' => $p->surname,
                 'first_name' => $p->first_name, 'other_names' => $p->other_names, 'date_of_birth' => $p->date_of_birth?->toDateString(),

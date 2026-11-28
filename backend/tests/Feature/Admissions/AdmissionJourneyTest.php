@@ -21,12 +21,16 @@ class AdmissionJourneyTest extends AdmissionsTestCase
             'surname' => 'Bello', 'first_name' => 'Musa', 'email' => 'musa@example.test', 'phone' => '08039999999',
             'password' => 'a-strong-password', 'password_confirmation' => 'a-strong-password',
         ])->assertCreated();
+        $this->postJson('/api/v1/applicant/register', [
+            'surname' => 'Bello', 'first_name' => 'Amina', 'email' => 'amina@example.test', 'phone' => '08039999999',
+            'password' => 'a-strong-password', 'password_confirmation' => 'a-strong-password',
+        ])->assertJsonValidationErrors('phone');
         $this->assertTrue(NotificationDelivery::where('template_code', 'applicant.verify_email')->where('recipient', 'musa@example.test')->exists());
 
         $user = User::where('email', 'musa@example.test')->first();
         $this->actingAs($user)->postJson('/api/v1/applicant/applications', ['exercise_id' => $exercise->uuid])->assertJsonValidationErrors('email');
 
-        $this->get(URL::temporarySignedRoute('applicant.verify', now()->addHour(), ['user' => $user->uuid, 'hash' => sha1($user->email)]))->assertRedirect('/login?verified=1');
+        $this->get(URL::temporarySignedRoute('applicant.verify', now()->addHour(), ['user' => $user->uuid, 'hash' => sha1($user->email)]))->assertRedirect(rtrim(config('app.frontend_url'), '/').'/login?verified=1');
         $this->get("/api/v1/applicant/verify/{$user->uuid}/".sha1($user->email))->assertForbidden(); // unsigned
         $this->assertNotNull($user->refresh()->email_verified_at);
         $this->actingAs($user)->postJson('/api/v1/applicant/applications', ['exercise_id' => $exercise->uuid])->assertCreated();

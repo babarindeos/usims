@@ -1,10 +1,16 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button, Card, ErrorNotice, PageHeader, Spinner, StatusBadge, TextAreaField, formatDate } from '../../design-system'
 import { api } from '../../lib/api'
 import type { WorkflowItem } from '../../lib/types'
 import { useMutate } from '../../lib/useMutate'
+
+/** Where each kind of approval subject is shown, so the approver can review it before deciding. */
+const SUBJECT_PAGES: Record<string, { label: string; path: (uuid: string) => string }> = {
+  AdmissionList: { label: 'Review the admission list', path: u => `/admissions/lists/${u}` },
+  CurriculumVersion: { label: 'Review the curriculum', path: u => `/academic/curricula/${u}` },
+}
 
 export function ApprovalDetailPage() {
   const { id } = useParams()
@@ -18,7 +24,8 @@ export function ApprovalDetailPage() {
 
   return (
     <>
-      <PageHeader title={w.reference} description={`${w.workflow} · ${w.org_unit?.name ?? ''} · submitted by ${w.initiated_by?.name ?? 'unknown'}`} />
+      <PageHeader title={w.reference} description={`${w.workflow} · ${w.org_unit?.name ?? ''} · submitted by ${w.initiated_by?.name ?? 'unknown'}`}
+        actions={w.subject.uuid && SUBJECT_PAGES[w.subject.type] && <Link className="text-sm font-medium text-brand" to={SUBJECT_PAGES[w.subject.type].path(w.subject.uuid)}>{SUBJECT_PAGES[w.subject.type].label}</Link>} />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="History" className="lg:col-span-2">
           <ol className="space-y-3 text-sm">

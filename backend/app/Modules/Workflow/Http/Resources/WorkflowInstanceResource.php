@@ -14,7 +14,7 @@ class WorkflowInstanceResource extends JsonResource
             'reference' => $this->reference,
             'process' => $this->definition->process,
             'workflow' => $this->definition->name,
-            'subject' => ['type' => class_basename($this->subject_type), 'id' => $this->subject_id],
+            'subject' => ['type' => class_basename($this->subject_type), 'id' => $this->subject_id, 'uuid' => $this->subject?->uuid],
             'org_unit' => $this->orgUnit ? ['id' => $this->orgUnit->uuid, 'name' => $this->orgUnit->name] : null,
             'status' => $this->status,
             'current_stage' => $this->currentStage ? ['code' => $this->currentStage->code, 'name' => $this->currentStage->name] : null,

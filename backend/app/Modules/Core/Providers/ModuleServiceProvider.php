@@ -2,11 +2,16 @@
 
 namespace App\Modules\Core\Providers;
 
+use App\Modules\Admissions\Events\ApplicationSubmitted;
+use App\Modules\Admissions\Events\ClearanceCompleted;
+use App\Modules\Admissions\Listeners\AdmissionWorkflowListener;
+use App\Modules\Admissions\Listeners\ScreenOnSubmission;
 use App\Modules\Audit\Services\AuditContext;
 use App\Modules\Curriculum\Listeners\SyncCurriculumWithWorkflow;
 use App\Modules\Identity\Models\User;
 use App\Modules\Identity\Services\AccessService;
 use App\Modules\Offerings\Listeners\FlagAssignmentsOnStaffChange;
+use App\Modules\Registry\Listeners\MatriculateWhenCleared;
 use App\Modules\Staff\Events\StaffStatusChanged;
 use App\Modules\Workflow\Events\WorkflowCompleted;
 use App\Modules\Workflow\Events\WorkflowStageChanged;
@@ -22,7 +27,7 @@ use Illuminate\Support\ServiceProvider;
 /** Wires every module: migrations, routes, the scoped permission gate and shared services. */
 class ModuleServiceProvider extends ServiceProvider
 {
-    public const MODULES = ['Identity', 'Institution', 'Audit', 'Workflow', 'Notifications', 'Programmes', 'Staff', 'Curriculum', 'Offerings'];
+    public const MODULES = ['Identity', 'Institution', 'Audit', 'Workflow', 'Notifications', 'Programmes', 'Staff', 'Curriculum', 'Offerings', 'Admissions', 'Registry'];
 
     public function register(): void
     {
@@ -59,5 +64,8 @@ class ModuleServiceProvider extends ServiceProvider
         Event::listen(WorkflowCompleted::class, NotifyInitiatorOfOutcome::class);
         Event::listen(WorkflowStageChanged::class, SyncCurriculumWithWorkflow::class);
         Event::listen(StaffStatusChanged::class, FlagAssignmentsOnStaffChange::class);
+        Event::listen(WorkflowStageChanged::class, AdmissionWorkflowListener::class);
+        Event::listen(ApplicationSubmitted::class, ScreenOnSubmission::class);
+        Event::listen(ClearanceCompleted::class, MatriculateWhenCleared::class);
     }
 }

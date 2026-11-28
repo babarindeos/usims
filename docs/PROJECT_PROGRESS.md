@@ -1,6 +1,6 @@
 # Project progress
 
-Current milestone: **M2 Academic setup, in review** (M1 also awaiting merge). Next: M3 Admissions to matriculation.
+Current milestone: **M3 Admissions to matriculation, in review** (M1 and M2 also awaiting merge). Next: M4 Fees and payments.
 
 ## Done
 
@@ -36,9 +36,22 @@ Current milestone: **M2 Academic setup, in review** (M1 also awaiting merge). Ne
 - Screens: programmes, programme detail with curriculum versions, course catalogue and detail with requisites, curriculum editor, offerings with generation, offering detail with cohorts and staff, staff records, academic configuration
 - Demo data: 2026/2027 session with two semesters, B.Sc. Computer Science with a draft curriculum, six courses, four staff
 
+### M3 Admissions to matriculation
+- Configurable admission categories, O'Level bodies and grade scales, subjects, document types, clearance offices, matric number formats and the admission letter template
+- Admission exercises: session, category, window, fees, capacity, acceptance window, instructions, programmes with entry levels, capacities and screening rules, required documents per stage; status changes need a reason
+- Applicant self-registration with email verification; applicant portal for biodata, programme choices, next of kin, JAMB details, O'Level sittings, previous education, document uploads, bank payment recording, and submission with a list of anything missing
+- Screening engine with per-programme rules; outcomes eligible, ineligible, awaiting verification, manual review; every run kept
+- Processing workspace scoped to the officer's departments: filters, CSV export, document verification, rescreen, recommend, hold, reject, change programme, corrections window; every view written to the access log
+- Bursary verification queue for application and acceptance fees (manual, against the bank statement; no gateway yet)
+- Admission lists approved through the workflow engine (committee, then approving officer); approval issues offers with stored letters; offers expire after the acceptance window
+- Acceptance with a declaration, acceptance fee, onboarding form and documents, clearance by each office with correction and resubmission
+- Matriculation (bulk, or automatic when `auto_matriculate` is on): student and matric numbers, identifiers, curriculum in force, append-only status history; student records with status changes
+- Approval pages link to the item being approved (admission list or curriculum)
+- Demo data: open 2026/2027 UTME exercise for B.Sc. Computer Science, committee, management and clearance officers
+
 ## Tests
-- Backend: 62 feature and unit tests (M1 plus programmes, courses, curricula, offerings, staff, permission seeding)
-- Frontend: design-system and curriculum-editor tests; end-to-end browser walkthrough run manually (draft curriculum, submit, HOD and Planning approval, publish, generate offerings, assign a lecturer, publish an offering)
+- Backend: 76 feature and unit tests (adds exercises, screening, admissions access scoping, and the full journey from registration to matriculation)
+- Frontend: design-system, curriculum-editor and applicant-form tests; end-to-end browser walkthroughs run manually. M3: register, verify email, apply, Bursary verifies the fee, Registry verifies documents and recommends, list approved by committee and management, applicant accepts and pays, onboarding, four clearance offices approve, Registry matriculates (2026/CSC/0001)
 
 ## Known gaps carried to later milestones
 - Keycloak OIDC sign-in and MFA enforcement (M5, with Moodle SSO); local passwords work now
@@ -47,8 +60,9 @@ Current milestone: **M2 Academic setup, in review** (M1 also awaiting merge). Ne
 - Org-unit edit and calendar edit screens: API done, UI covers create and list only
 - Moodle course creation for published offerings waits for M5; `OfferingPublished` and staff assignment events are already raised for it
 - Staff records are entered by hand until the HR module (M6) takes over; programme and course edit forms cover status changes, other edits are API-only for now
+- Admissions: no matric-number preview screen yet; letter template is plain text; JAMB data is entered by the applicant (no JAMB/CAPS integration); password reset not yet built; the queue worker (`php artisan queue:work`) must run for verification emails to send
 
-## Next tasks (M3)
-1. Admission exercises and applicant portal with biodata, JAMB and O'Level records, document uploads
-2. Configurable screening rules and processing, approvals through the workflow engine, offers and acceptance
-3. Onboarding and clearance, student record creation, matric numbers from a configurable format, status history
+## Next tasks (M4)
+1. Fee items and schedules by programme, level, category and session; invoices and student ledger
+2. Payment gateway integration through the outbox pattern, with webhook verification; admission fees move onto it
+3. Bursary reconciliation, waivers and refunds with approval

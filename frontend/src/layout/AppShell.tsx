@@ -3,16 +3,16 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../app/auth'
 import { useBranding } from '../app/branding'
-import { NAV } from '../app/navigation'
+import { APPLICANT_NAV, NAV } from '../app/navigation'
 import { api } from '../lib/api'
 
 export function AppShell() {
-  const { user, can, signOut } = useAuth()
+  const { user, can, signOut, applicantOnly } = useAuth()
   const branding = useBranding()
   const [open, setOpen] = useState(false)
   const unread = useQuery({ queryKey: ['notifications', 'unread'], queryFn: () => api<{ unread_count: number }>('/notifications?unread=1'), refetchInterval: 60_000 })
 
-  const items = NAV.filter(i => !i.permission || can(i.permission))
+  const items = applicantOnly ? APPLICANT_NAV : NAV.filter(i => !i.permission || can(i.permission))
   const sections = [...new Set(items.map(i => i.section))]
 
   return (
@@ -30,7 +30,7 @@ export function AppShell() {
             <div key={section}>
               <p className="px-2 pb-1 text-xs font-medium uppercase tracking-wide text-muted">{section}</p>
               {items.filter(i => i.section === section).map(i => (
-                <NavLink key={i.to} to={i.to} end={i.to === '/'} onClick={() => setOpen(false)}
+                <NavLink key={i.to} to={i.to} end={i.to === '/' || i.to === '/applicant'} onClick={() => setOpen(false)}
                   className={({ isActive }) => `block rounded-md px-2 py-1.5 text-sm ${isActive ? 'bg-brand/10 font-medium text-brand' : 'text-ink hover:bg-canvas'}`}>
                   {i.label}
                 </NavLink>

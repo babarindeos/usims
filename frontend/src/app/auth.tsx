@@ -9,6 +9,8 @@ type AuthState = {
   permissions: string[]
   loading: boolean
   can: (permission: string) => boolean
+  /** True when every role the user holds is the applicant role. */
+  applicantOnly: boolean
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading: me.isLoading,
     // Navigation hint only: every action is authorised again by the API.
     can: p => permissions.includes(p),
+    applicantOnly: !!me.data?.data.grants?.length && me.data.data.grants.every(g => g.role.code === 'applicant'),
     signIn: async (email, password) => {
       const result = await api<Me>('/auth/login', { method: 'POST', body: { email, password } })
       client.setQueryData(['me'], result)

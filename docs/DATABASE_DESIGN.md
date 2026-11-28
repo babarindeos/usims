@@ -93,8 +93,45 @@ curriculum cannot change even outside the application.
 Settings used: `teaching_eligible_categories` (default `["academic"]`), `lms_shortname_format`
 (default `{code}-{session}-{semester}{group}`).
 
+## Tables built in M3
+
+### Admissions configuration
+| Table | Purpose |
+| --- | --- |
+| admission_categories | UTME, direct entry, postgraduate, transfer…; `requires_jamb` |
+| exam_bodies, exam_grades | O'Level bodies with their own grade scales (points, `is_credit`) |
+| olevel_subjects | subjects used by O'Level, UTME and screening rules |
+| document_types | uploadable documents with size limit and `needs_verification` |
+| clearance_units | clearance offices; `target` fixed, department or faculty; order |
+| admission_exercises | session, category, window (CHECK closes after opens), fees, capacity, acceptance days, instructions, status |
+| exercise_programmes | programme + entry level per exercise with capacity and `rules` JSON (unique together) |
+| exercise_documents | document types required at the application or onboarding stage |
+
+### Applications
+| Table | Purpose |
+| --- | --- |
+| applications | one per person per exercise; application number issued on submission, choices, next of kin, JAMB details, screening outcome, corrections flag |
+| application_status_history | every status change with reason and user |
+| application_documents | uploads; a new upload supersedes the old one (`superseded_at`), review status and remarks |
+| olevel_sittings, olevel_results | sittings and graded subjects |
+| education_records | previous qualifications |
+| screening_results | each screening run with its checks and the rules used |
+| admission_payments | application and acceptance fees: amount, status, bank reference, evidence, verifier. Partial unique index on (method, reference) for non-rejected rows |
+| admission_lists, admission_list_entries | lists of recommended applicants sent through the approval workflow |
+| admission_offers | admission number, programme, entry level, accept-by date, status, stored letter, onboarding JSON |
+| clearance_items, clearance_actions | one item per office per offer, with every review action kept |
+
+### Registry
+| Table | Purpose |
+| --- | --- |
+| matric_formats | format strings, optionally limited to an admission or programme category |
+| students | student number, matric number (unique), person, offer (unique), programme, category, admission session, curriculum, entry and current level, status |
+| student_status_history | append-only (PostgreSQL trigger rejects UPDATE and DELETE); effective date, reason, user |
+
+Settings used: `admission_letter_template`, `auto_matriculate` (default false). Identifier
+sequences: `APP`, `ADM`, `STU`, `matric:<prefix>`.
+
 ## Planned (later milestones)
 
-The rest of the lifecycle spine (applications, students,
-invoices, payments, registrations, results, Moodle mappings, outbox) is specified in the
+The rest of the lifecycle spine (invoices, payments, registrations, results, Moodle mappings, outbox) is specified in the
 architecture review and is added module by module, each with its migration and this file updated.

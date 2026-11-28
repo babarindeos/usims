@@ -1,5 +1,11 @@
 // Sidebar entries. Each shows when the user holds its permission somewhere; the API still checks scope.
-export type NavItem = { to: string; label: string; permission?: string; section: string }
+// Applicant-only accounts see the applicant entries; everyone else sees the staff entries.
+export type NavItem = { to: string; label: string; permission?: string; section: string; audience?: 'applicant' | 'staff' }
+
+export const APPLICANT_NAV: NavItem[] = [
+  { to: '/applicant', label: 'My applications', section: 'Admission', audience: 'applicant' },
+  { to: '/notifications', label: 'Notifications', section: 'Admission', audience: 'applicant' },
+]
 
 export const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', section: 'Overview' },
@@ -14,6 +20,15 @@ export const NAV: NavItem[] = [
   { to: '/academic/offerings', label: 'Course offerings', section: 'Academics' },
   { to: '/academic/config', label: 'Academic configuration', permission: 'academic_config.manage', section: 'Academics' },
 
+  { to: '/admissions/exercises', label: 'Admission exercises', permission: 'admissions.view', section: 'Admissions' },
+  { to: '/admissions/applications', label: 'Applications', permission: 'admissions.view', section: 'Admissions' },
+  { to: '/admissions/lists', label: 'Admission lists', permission: 'admissions.view', section: 'Admissions' },
+  { to: '/admissions/payments', label: 'Payment verification', permission: 'admission_payments.verify', section: 'Admissions' },
+  { to: '/admissions/offers', label: 'Offers and matriculation', permission: 'admissions.view', section: 'Admissions' },
+  { to: '/admissions/clearance', label: 'Clearance', permission: 'clearance.review', section: 'Admissions' },
+  { to: '/admissions/config', label: 'Admissions configuration', permission: 'admissions.configure', section: 'Admissions' },
+
+  { to: '/students', label: 'Student records', permission: 'students.view', section: 'Records' },
   { to: '/persons', label: 'Person records', permission: 'persons.view', section: 'Records' },
   { to: '/staff', label: 'Staff records', permission: 'staff.view', section: 'Records' },
 

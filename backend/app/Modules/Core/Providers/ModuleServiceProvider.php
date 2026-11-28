@@ -3,9 +3,13 @@
 namespace App\Modules\Core\Providers;
 
 use App\Modules\Audit\Services\AuditContext;
+use App\Modules\Curriculum\Listeners\SyncCurriculumWithWorkflow;
 use App\Modules\Identity\Models\User;
 use App\Modules\Identity\Services\AccessService;
+use App\Modules\Offerings\Listeners\FlagAssignmentsOnStaffChange;
+use App\Modules\Staff\Events\StaffStatusChanged;
 use App\Modules\Workflow\Events\WorkflowCompleted;
+use App\Modules\Workflow\Events\WorkflowStageChanged;
 use App\Modules\Workflow\Listeners\NotifyInitiatorOfOutcome;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -18,7 +22,7 @@ use Illuminate\Support\ServiceProvider;
 /** Wires every module: migrations, routes, the scoped permission gate and shared services. */
 class ModuleServiceProvider extends ServiceProvider
 {
-    public const MODULES = ['Identity', 'Institution', 'Audit', 'Workflow', 'Notifications'];
+    public const MODULES = ['Identity', 'Institution', 'Audit', 'Workflow', 'Notifications', 'Programmes', 'Staff', 'Curriculum', 'Offerings'];
 
     public function register(): void
     {
@@ -53,5 +57,7 @@ class ModuleServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(240)->by($request->user()?->id ?: $request->ip()));
 
         Event::listen(WorkflowCompleted::class, NotifyInitiatorOfOutcome::class);
+        Event::listen(WorkflowStageChanged::class, SyncCurriculumWithWorkflow::class);
+        Event::listen(StaffStatusChanged::class, FlagAssignmentsOnStaffChange::class);
     }
 }
